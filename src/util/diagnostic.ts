@@ -18,11 +18,11 @@ const SEVERITY_RANK: Readonly<Record<Severity, number>> = {
 
 export interface SourceRef {
   /** The upload the row arrived in. */
-  readonly batch?: string;
+  readonly batch?: string | undefined;
   /** File name inside the upload. */
-  readonly file?: string;
+  readonly file?: string | undefined;
   /** One based line number. */
-  readonly line?: number;
+  readonly line?: number | undefined;
 }
 
 export interface Diagnostic {
