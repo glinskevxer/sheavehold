@@ -23,9 +23,11 @@ export interface DedupeOptions {
   readonly guardSeconds?: number | undefined;
   /** Never use a window shorter than this, whatever the gate claims. */
   readonly floorSeconds?: number | undefined;
+  /** Window for the same media across two gates of one maze. */
+  readonly mazeSeconds?: number | undefined;
 }
 
-export type SuppressionReason = 'terminal_debounce';
+export type SuppressionReason = 'terminal_debounce' | 'maze_crossover';
 
 export interface Suppression {
   readonly scan: NormalisedScan;
@@ -41,6 +43,14 @@ export interface DedupeResult {
 
 export const DEFAULT_GUARD_SECONDS = 2;
 export const DEFAULT_FLOOR_SECONDS = 5;
+
+/**
+ * How long after a read at one gate a read of the same media at a different
+ * gate of the same maze is still the same person. Deliberately wider than the
+ * terminal window: somebody who walks the length of a six lane maze and tries
+ * the far arm takes longer than a tag sitting in one field.
+ */
+export const DEFAULT_MAZE_SECONDS = 45;
 
 export function terminalWindowMs(scan: NormalisedScan, options: DedupeOptions): number {
   const guard = options.guardSeconds ?? DEFAULT_GUARD_SECONDS;
@@ -87,6 +97,63 @@ export function dedupeByTerminal(
   }
 
   return { kept, suppressed };
+}
+
+/**
+ * The second pass. Two gates of one maze feed the same loading point, so the
+ * same media read at both inside the maze window is one person who tried the
+ * wrong lane, not two rides. This runs after the terminal pass, on what that
+ * pass kept, because a run of five reads at one gate would otherwise decide
+ * which read the maze pass compares against.
+ */
+export function dedupeByMaze(
+  scans: readonly NormalisedScan[],
+  options: DedupeOptions,
+): DedupeResult {
+  const windowMs = (options.mazeSeconds ?? DEFAULT_MAZE_SECONDS) * 1000;
+  const kept: NormalisedScan[] = [];
+  const suppressed: Suppression[] = [];
+  const lastKept = new Map<string, NormalisedScan>();
+
+  for (const scan of scans) {
+    if (scan.outcome !== 'accept') {
+      kept.push(scan);
+      continue;
+    }
+    const key = `${scan.maze}#${scan.mediaSerial}`;
+    const previous = lastKept.get(key);
+    if (previous !== undefined && previous.terminalId !== scan.terminalId) {
+      const gapMs = scan.at.getTime() - previous.at.getTime();
+      if (gapMs >= 0 && gapMs < windowMs) {
+        suppressed.push({ scan, keptSequence: previous.sequence, gapMs, reason: 'maze_crossover' });
+        continue;
+      }
+    }
+    lastKept.set(key, scan);
+    kept.push(scan);
+  }
+
+  return { kept, suppressed };
+}
+
+/** Both passes, in the order that matters, with the suppressions merged. */
+export function dedupe(scans: readonly NormalisedScan[], options: DedupeOptions): DedupeResult {
+  const first = dedupeByTerminal(scans, options);
+  const second = dedupeByMaze(first.kept, options);
+  return {
+    kept: second.kept,
+    suppressed: [...first.suppressed, ...second.suppressed].sort(
+      (a, b) => a.scan.at.getTime() - b.scan.at.getTime() || a.scan.sequence - b.scan.sequence,
+    ),
+  };
+}
+
+export function suppressionsByReason(result: DedupeResult): Map<SuppressionReason, number> {
+  const counts = new Map<SuppressionReason, number>();
+  for (const entry of result.suppressed) {
+    counts.set(entry.reason, (counts.get(entry.reason) ?? 0) + 1);
+  }
+  return counts;
 }
 
 /** Counts per terminal, which is how a badly debouncing gate gets found. */
