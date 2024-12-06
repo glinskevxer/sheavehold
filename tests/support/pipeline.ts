@@ -12,11 +12,11 @@ import { calendar2024 } from './season.js';
 import { clocks, rawScan, terminals } from './scans.js';
 
 export interface ScanSpec {
-  readonly terminal?: string;
-  readonly media?: string;
+  readonly terminal?: string | undefined;
+  readonly media?: string | undefined;
   readonly at: string;
-  readonly outcome?: 'accept' | 'reject';
-  readonly seq?: number;
+  readonly outcome?: 'accept' | 'reject' | undefined;
+  readonly seq?: number | undefined;
 }
 
 export function rawFrom(specs: readonly ScanSpec[]): RawScanRow[] {
