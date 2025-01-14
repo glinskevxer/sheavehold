@@ -21,6 +21,8 @@ export interface Lift {
   readonly topElevationFt: number;
   /** Along the line, not the horizontal run. */
   readonly slopeLengthFt: number;
+  /** Elevation of the mid station, when the lift has one people get off at. */
+  readonly midStationFt: number | undefined;
   /** People per carrier at the design load. A chair seats four. */
   readonly carrierCapacity: number;
   /** Carriers arriving at the loading point per hour at design speed. */
@@ -48,6 +50,16 @@ export function isLiftStatus(value: string): value is LiftStatus {
 /** The number every vertical calculation multiplies by. */
 export function verticalRiseFt(lift: Lift): number {
   return lift.topElevationFt - lift.baseElevationFt;
+}
+
+/** Rise as far as the mid station, for a guest who did not ride to the top. */
+export function midStationRiseFt(lift: Lift): number | undefined {
+  if (lift.midStationFt === undefined) return undefined;
+  return lift.midStationFt - lift.baseElevationFt;
+}
+
+export function hasMidStation(lift: Lift): boolean {
+  return lift.midStationFt !== undefined;
 }
 
 /**
@@ -84,6 +96,7 @@ export interface LiftInput {
   readonly baseElevationFt: number;
   readonly topElevationFt: number;
   readonly slopeLengthFt: number;
+  readonly midStationFt?: number | undefined;
   readonly carrierCapacity: number;
   readonly carriersPerHour: number;
   readonly rideMinutes: number;
@@ -123,6 +136,14 @@ export function makeLift(input: LiftInput): Result<Lift> {
   if (!Number.isInteger(input.carrierCapacity)) {
     return err(`lift ${input.code} seats a fraction of a person`);
   }
+  if (input.midStationFt !== undefined) {
+    if (input.midStationFt <= input.baseElevationFt || input.midStationFt >= input.topElevationFt) {
+      return err(`lift ${input.code} has a mid station outside the line`);
+    }
+    if (input.kind !== 'gondola' && input.kind !== 'tram') {
+      return err(`lift ${input.code} is a ${input.kind} and cannot have a mid station`);
+    }
+  }
 
   return ok({
     code: code.value,
@@ -131,6 +152,7 @@ export function makeLift(input: LiftInput): Result<Lift> {
     baseElevationFt: input.baseElevationFt,
     topElevationFt: input.topElevationFt,
     slopeLengthFt: input.slopeLengthFt,
+    midStationFt: input.midStationFt,
     carrierCapacity: input.carrierCapacity,
     carriersPerHour: input.carriersPerHour,
     rideMinutes: input.rideMinutes,

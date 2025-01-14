@@ -33,6 +33,7 @@ export const RIDGELINE = liftOf({
   baseElevationFt: 8_140,
   topElevationFt: 10_020,
   slopeLengthFt: 7_940,
+  midStationFt: 9_200,
   carrierCapacity: 8,
   carriersPerHour: 260,
   rideMinutes: 11,
