@@ -1,4 +1,5 @@
 import type { OperatingDate } from '../../util/clock.js';
+import { groupBy, sumBy } from '../../util/collect.js';
 import type { LiftCode } from '../../util/ids.js';
 import { compareRides, type Ride } from '../ride/ride.js';
 
@@ -26,19 +27,15 @@ export interface VerticalLedgerOptions {
 /** Nobody skis this in a day. Above it the reading is a fault, not a feat. */
 export const IMPLAUSIBLE_DAILY_VERTICAL_FT = 90_000;
 
+const riseOf = (ride: Ride): number => ride.verticalFt;
+
 function accumulate(
   rides: readonly Ride[],
   keyOf: (ride: Ride) => string,
 ): Map<string, VerticalRow> {
   const rows = new Map<string, VerticalRow>();
-  for (const ride of rides) {
-    const key = keyOf(ride);
-    const row = rows.get(key) ?? { key, rideCount: 0, verticalFt: 0 };
-    rows.set(key, {
-      key,
-      rideCount: row.rideCount + 1,
-      verticalFt: row.verticalFt + ride.verticalFt,
-    });
+  for (const [key, own] of groupBy(rides, keyOf)) {
+    rows.set(key, { key, rideCount: own.length, verticalFt: sumBy(own, riseOf) });
   }
   return rows;
 }
@@ -66,7 +63,7 @@ export function verticalByProduct(rides: readonly Ride[]): VerticalRow[] {
 }
 
 export function totalVertical(rides: readonly Ride[]): number {
-  return rides.reduce((total, ride) => total + ride.verticalFt, 0);
+  return sumBy(rides, riseOf);
 }
 
 /** A guest's vertical on one day, which is what the leaderboard ranks. */
@@ -118,11 +115,7 @@ export function leaderboard(
   options: VerticalLedgerOptions & { readonly limit?: number | undefined } = {},
 ): LeaderboardEntry[] {
   const cap = options.dailyCapFt ?? IMPLAUSIBLE_DAILY_VERTICAL_FT;
-  const groups = new Map<string, Ride[]>();
-  for (const ride of rides) {
-    const key = `${ride.guestId}#${ride.operatingDate}`;
-    groups.set(key, [...(groups.get(key) ?? []), ride]);
-  }
+  const groups = groupBy(rides, (ride) => `${ride.guestId}#${ride.operatingDate}`);
   const entries: LeaderboardEntry[] = [];
   for (const own of groups.values()) {
     const first = own[0];

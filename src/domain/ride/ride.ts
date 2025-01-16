@@ -1,4 +1,5 @@
 import type { OperatingDate } from '../../util/clock.js';
+import { groupBy, sumBy } from '../../util/collect.js';
 import type { LiftCode, MediaSerial, TerminalId } from '../../util/ids.js';
 import type { LiftRegistry } from '../lift/lift.js';
 import { verticalRiseFt } from '../lift/lift.js';
@@ -110,13 +111,9 @@ export function ridesOnLift(rides: readonly Ride[], lift: LiftCode): Ride[] {
 }
 
 export function totalVerticalFt(rides: readonly Ride[]): number {
-  return rides.reduce((total, ride) => total + ride.verticalFt, 0);
+  return sumBy(rides, (ride) => ride.verticalFt);
 }
 
 export function ridesByLift(rides: readonly Ride[]): Map<LiftCode, Ride[]> {
-  const byLift = new Map<LiftCode, Ride[]>();
-  for (const ride of rides) {
-    byLift.set(ride.lift, [...(byLift.get(ride.lift) ?? []), ride]);
-  }
-  return byLift;
+  return groupBy(rides, (ride) => ride.lift);
 }

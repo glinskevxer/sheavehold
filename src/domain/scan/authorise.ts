@@ -1,4 +1,5 @@
 import type { OperatingDate } from '../../util/clock.js';
+import { tallyBy } from '../../util/collect.js';
 import type { OperatingCalendar } from '../calendar/season.js';
 import type { BlackoutRegistry } from '../product/blackout.js';
 import {
@@ -197,10 +198,5 @@ export function deniedOnly(results: readonly AuthorisationResult[]): Authorisati
 export function denialTally(
   results: readonly AuthorisationResult[],
 ): Map<AuthorisationDenial, number> {
-  const counts = new Map<AuthorisationDenial, number>();
-  for (const result of results) {
-    if (result.denial === undefined) continue;
-    counts.set(result.denial, (counts.get(result.denial) ?? 0) + 1);
-  }
-  return counts;
+  return tallyBy(results, (result) => result.denial);
 }

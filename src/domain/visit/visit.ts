@@ -1,5 +1,6 @@
 import type { OperatingDate } from '../../util/clock.js';
 import type { LiftCode } from '../../util/ids.js';
+import { distinctSorted, groupBy, sumBy } from '../../util/collect.js';
 import { compareRides, totalVerticalFt, type Ride } from '../ride/ride.js';
 
 /**
@@ -59,7 +60,7 @@ function sessionOf(rides: readonly Ride[]): Session {
     endedAt: last.unloadsAt,
     rideCount: rides.length,
     verticalFt: totalVerticalFt(rides),
-    lifts: [...new Set(rides.map((ride) => ride.lift))].sort(),
+    lifts: distinctSorted(rides, (ride) => ride.lift) as LiftCode[],
   };
 }
 
@@ -89,11 +90,9 @@ function splitSessions(rides: readonly Ride[], gapMinutes: number): Session[] {
  */
 export function buildVisits(rides: readonly Ride[], options: VisitOptions = {}): Visit[] {
   const gapMinutes = options.sessionGapMinutes ?? DEFAULT_SESSION_GAP_MINUTES;
-  const groups = new Map<string, Ride[]>();
-  for (const ride of rides) {
-    const key = visitId(ride.operatingDate, ride.guestId, ride.entitlementId);
-    groups.set(key, [...(groups.get(key) ?? []), ride]);
-  }
+  const groups = groupBy(rides, (ride) =>
+    visitId(ride.operatingDate, ride.guestId, ride.entitlementId),
+  );
 
   const visits: Visit[] = [];
   for (const [id, own] of groups) {
@@ -111,7 +110,7 @@ export function buildVisits(rides: readonly Ride[], options: VisitOptions = {}):
       lastRideAt: last.boardedAt,
       rideCount: ordered.length,
       verticalFt: totalVerticalFt(ordered),
-      lifts: [...new Set(ordered.map((ride) => ride.lift))].sort(),
+      lifts: distinctSorted(ordered, (ride) => ride.lift) as LiftCode[],
       sessions: splitSessions(ordered, gapMinutes),
       spanMinutes: Math.round((last.boardedAt.getTime() - first.boardedAt.getTime()) / 60_000),
     });
@@ -153,6 +152,6 @@ export function singleRideVisits(visits: readonly Visit[]): Visit[] {
 
 export function averageRidesPerVisit(visits: readonly Visit[]): number {
   if (visits.length === 0) return 0;
-  const total = visits.reduce((sum, visit) => sum + visit.rideCount, 0);
+  const total = sumBy(visits, (visit) => visit.rideCount);
   return Math.round((total / visits.length) * 10) / 10;
 }

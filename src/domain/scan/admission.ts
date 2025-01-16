@@ -3,6 +3,7 @@ import type { MediaSerial } from '../../util/ids.js';
 import type { BindingLedger } from '../media/binding.js';
 import type { Media } from '../media/media.js';
 import type { TerminalRegistry } from '../lift/terminal.js';
+import { distinct } from '../../util/collect.js';
 import type { NormalisedScan } from './normalise.js';
 
 /**
@@ -113,13 +114,10 @@ export function disagreements(results: readonly AdmissionResult[]): AdmissionRes
 
 /** Media that turned up at a gate and resolved to nothing, worth chasing. */
 export function unresolvedMedia(results: readonly AdmissionResult[]): MediaSerial[] {
-  const serials = new Set<string>();
-  for (const result of results) {
-    if (result.refusal === 'unknown_media' || result.refusal === 'no_binding') {
-      serials.add(result.scan.mediaSerial);
-    }
-  }
-  return [...serials].sort() as MediaSerial[];
+  const chasing = results.filter(
+    (result) => result.refusal === 'unknown_media' || result.refusal === 'no_binding',
+  );
+  return distinct(chasing, (result) => result.scan.mediaSerial).sort();
 }
 
 export function refusalsOnDate(

@@ -1,3 +1,4 @@
+import { tallyBy } from '../../util/collect.js';
 import type { Severity } from '../../util/diagnostic.js';
 import type { RefusalCode } from './admission.js';
 import type { AuthorisationDenial, AuthorisationResult } from './authorise.js';
@@ -235,11 +236,5 @@ export function exceptionWorthy(results: readonly AuthorisationResult[]): Author
 export function rejectionTally(
   results: readonly AuthorisationResult[],
 ): Map<ScanRejection, number> {
-  const counts = new Map<ScanRejection, number>();
-  for (const result of results) {
-    const code = rejectionOf(result);
-    if (code === undefined) continue;
-    counts.set(code, (counts.get(code) ?? 0) + 1);
-  }
-  return counts;
+  return tallyBy(results, rejectionOf);
 }

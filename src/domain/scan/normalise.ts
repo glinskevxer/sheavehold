@@ -1,4 +1,5 @@
 import { operatingDay, type OperatingDate } from '../../util/clock.js';
+import { groupBy } from '../../util/collect.js';
 import type { DiagnosticBag } from '../../util/diagnostic.js';
 import {
   liftOfTerminal,
@@ -163,22 +164,17 @@ export interface SequenceGap {
  * been uploaded yet. It becomes an error when the day is closed.
  */
 export function sequenceGaps(scans: readonly NormalisedScan[]): SequenceGap[] {
-  const byTerminal = new Map<string, number[]>();
-  for (const scan of scans) {
-    const list = byTerminal.get(scan.terminalId) ?? [];
-    list.push(scan.sequence);
-    byTerminal.set(scan.terminalId, list);
-  }
+  const byTerminal = groupBy(scans, (scan) => scan.terminalId);
   const gaps: SequenceGap[] = [];
-  for (const [terminalId, sequences] of byTerminal) {
-    const sorted = [...new Set(sequences)].sort((a, b) => a - b);
+  for (const [terminalId, own] of byTerminal) {
+    const sorted = [...new Set(own.map((scan) => scan.sequence))].sort((a, b) => a - b);
     for (let i = 1; i < sorted.length; i += 1) {
       const before = sorted[i - 1];
       const after = sorted[i];
       if (before === undefined || after === undefined) continue;
       if (after - before > 1) {
         gaps.push({
-          terminalId: terminalId as TerminalId,
+          terminalId,
           after: before,
           before: after,
           missing: after - before - 1,

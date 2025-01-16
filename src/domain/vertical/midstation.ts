@@ -1,3 +1,4 @@
+import { groupBy, sumBy } from '../../util/collect.js';
 import type { LiftRegistry } from '../lift/lift.js';
 import { midStationRiseFt, verticalRiseFt } from '../lift/lift.js';
 import { compareRides, type Ride } from '../ride/ride.js';
@@ -46,10 +47,7 @@ export function applyMidStationUnloads(
 ): MidStationResult {
   const factor = options.descentFactor ?? DEFAULT_DESCENT_FACTOR;
   const ordered = [...rides].sort(compareRides);
-  const byGuest = new Map<string, Ride[]>();
-  for (const ride of ordered) {
-    byGuest.set(ride.guestId, [...(byGuest.get(ride.guestId) ?? []), ride]);
-  }
+  const byGuest = groupBy(ordered, (ride) => ride.guestId);
 
   const adjustments: MidStationAdjustment[] = [];
   const credited = new Map<string, number>();
@@ -94,8 +92,5 @@ export function adjustedRideIds(result: MidStationResult): string[] {
 
 /** Feet the inference took back off the season total. */
 export function verticalReclaimedFt(result: MidStationResult): number {
-  return result.adjustments.reduce(
-    (total, entry) => total + (entry.fullRiseFt - entry.creditedFt),
-    0,
-  );
+  return sumBy(result.adjustments, (entry) => entry.fullRiseFt - entry.creditedFt);
 }

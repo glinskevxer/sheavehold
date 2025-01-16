@@ -1,3 +1,4 @@
+import { groupBy } from '../../util/collect.js';
 import type { LiftCode } from '../../util/ids.js';
 import type { Lift, LiftRegistry } from '../lift/lift.js';
 import { compareRides, type Ride } from './ride.js';
@@ -22,10 +23,7 @@ export interface Turnaround {
 
 /** Consecutive rides by the same guest on the same lift, back to back. */
 export function turnarounds(rides: readonly Ride[]): Turnaround[] {
-  const byGuest = new Map<string, Ride[]>();
-  for (const ride of rides) {
-    byGuest.set(ride.guestId, [...(byGuest.get(ride.guestId) ?? []), ride]);
-  }
+  const byGuest = groupBy(rides, (ride) => ride.guestId);
   const out: Turnaround[] = [];
   for (const [guestId, own] of byGuest) {
     const ordered = [...own].sort(compareRides);
