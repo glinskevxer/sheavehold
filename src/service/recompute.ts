@@ -1,4 +1,4 @@
-import type { OperatingDate } from '../util/clock.js';
+import { addOperatingDays, type OperatingDate } from '../util/clock.js';
 import { DiagnosticBag } from '../util/diagnostic.js';
 import type { OperatingCalendar } from '../domain/calendar/season.js';
 import type { LiftRegistry } from '../domain/lift/lift.js';
@@ -14,6 +14,11 @@ import {
 import { dedupe, type DedupeResult } from '../domain/scan/dedupe.js';
 import { rejectionOf, rejectionTally, turnaways } from '../domain/scan/reasons.js';
 import { buildRides, type Ride } from '../domain/ride/ride.js';
+import { reassignBoundaryRides, type BoundaryMove } from '../domain/visit/boundary.js';
+import {
+  applyMidStationUnloads,
+  type MidStationAdjustment,
+} from '../domain/vertical/midstation.js';
 import { buildVisits, type Visit } from '../domain/visit/visit.js';
 import type { ReferenceStore } from '../storage/repository/reference.js';
 import type { RideStore } from '../storage/repository/rides.js';
@@ -40,6 +45,8 @@ export interface RecomputeResult {
   readonly rides: readonly Ride[];
   readonly visits: readonly Visit[];
   readonly rejections: ReadonlyMap<string, number>;
+  readonly boundaryMoves: readonly BoundaryMove[];
+  readonly midStationAdjustments: readonly MidStationAdjustment[];
   readonly diagnostics: DiagnosticBag;
 }
 
@@ -53,6 +60,10 @@ export interface RecomputeContext {
   readonly calendar: OperatingCalendar;
   readonly blackouts: BlackoutRegistry;
   readonly sessionGapMinutes?: number | undefined;
+  /** Minutes after the 04:00 rollover a ride still counts as the day before. */
+  readonly boundaryGraceMinutes?: number | undefined;
+  /** Turn the mid station inference off, which the audit run does. */
+  readonly inferMidStation?: boolean | undefined;
 }
 
 /**
@@ -86,12 +97,45 @@ export function recomputeDate(date: OperatingDate, context: RecomputeContext): R
     ledger: seedLedger(context, date),
   });
 
-  const rides = buildRides(authorisations, { lifts: context.lifts });
+  const built = buildRides(authorisations, { lifts: context.lifts });
+
+  const previousDay = context.rides.ridesOn(addOperatingDays(date, -1));
+  const boundary = reassignBoundaryRides(
+    [...previousDay, ...built],
+    context.boundaryGraceMinutes === undefined
+      ? {}
+      : { graceMinutes: context.boundaryGraceMinutes },
+  );
+  const onThisDay = boundary.rides.filter(
+    (ride) => ride.operatingDate === date && built.some((entry) => entry.id === ride.id),
+  );
+
+  const midStation =
+    context.inferMidStation === false
+      ? { rides: onThisDay, adjustments: [] }
+      : applyMidStationUnloads(onThisDay, { lifts: context.lifts });
+  const rides = midStation.rides;
+
   const visitOptions =
     context.sessionGapMinutes === undefined ? {} : { sessionGapMinutes: context.sessionGapMinutes };
   const visits = buildVisits(rides, visitOptions);
 
   context.rides.replaceDate(date, rides, visits);
+
+  if (boundary.moves.length > 0) {
+    diagnostics.info(
+      'recompute.boundary_moved',
+      `${boundary.moves.length} rides were pulled back across the rollover`,
+      { date, moved: boundary.moves.length },
+    );
+  }
+  if (midStation.adjustments.length > 0) {
+    diagnostics.info(
+      'recompute.mid_station',
+      `${midStation.adjustments.length} rides were credited to the mid station`,
+      { date, adjusted: midStation.adjustments.length },
+    );
+  }
 
   const refused = authorisations.filter((result) => rejectionOf(result) !== undefined).length;
   if (scans.length > 0 && rides.length === 0) {
@@ -113,6 +157,8 @@ export function recomputeDate(date: OperatingDate, context: RecomputeContext): R
     rides,
     visits,
     rejections: rejectionTally(authorisations),
+    boundaryMoves: boundary.moves,
+    midStationAdjustments: midStation.adjustments,
     diagnostics,
   };
 }
