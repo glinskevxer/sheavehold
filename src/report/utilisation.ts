@@ -4,7 +4,8 @@ import type { LiftCode } from '../util/ids.js';
 import { designCapacityPerHour } from '../domain/lift/lift.js';
 import { areaUtilisation, pinchedHours } from '../domain/capacity/utilisation.js';
 import { hourLabel } from '../domain/capacity/capacity.js';
-import { indent, renderTable, type Column } from '../util/table.js';
+import type { Column } from '../util/table.js';
+import { renderDocument, tableSection, type ReportDocument } from './writer.js';
 import type { QueryContext } from '../service/query.js';
 
 /**
@@ -121,15 +122,17 @@ const columns: Column<UtilisationRow>[] = [
   { header: 'pinched', align: 'right', value: (row) => String(row.pinchedHours) },
 ];
 
+export function utilisationDocument(report: UtilisationReport): ReportDocument {
+  return {
+    title: `lift utilisation  ${report.from} to ${report.to}`,
+    subtitle: `pinched means an hour at or above ${report.threshold}% of design capacity`,
+    sections: [tableSection(report.rows, columns, { emptyNote: 'no lift turned' })],
+    footer: [`area average ${report.areaAverage}% of the capacity that was turning`],
+  };
+}
+
 export function renderUtilisationReport(report: UtilisationReport): string[] {
-  return [
-    `lift utilisation  ${report.from} to ${report.to}`,
-    `pinched means an hour at or above ${report.threshold}% of design capacity`,
-    '',
-    ...indent(renderTable(report.rows, columns)),
-    '',
-    `area average ${report.areaAverage}% of the capacity that was turning`,
-  ];
+  return renderDocument(utilisationDocument(report));
 }
 
 export function pinchPoint(report: UtilisationReport): UtilisationRow | undefined {

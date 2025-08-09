@@ -2,7 +2,8 @@ import { operatingDateRange, type OperatingDate } from '../util/clock.js';
 import { groupBy, sumBy } from '../util/collect.js';
 import { displayName } from '../domain/guest/guest.js';
 import { leaderboard, type LeaderboardEntry } from '../domain/vertical/vertical.js';
-import { indent, renderTable, truncate, type Column } from '../util/table.js';
+import { truncate, type Column } from '../util/table.js';
+import { renderDocument, tableSection, type ReportDocument } from './writer.js';
 import type { ReferenceStore } from '../storage/repository/reference.js';
 import type { RideStore } from '../storage/repository/rides.js';
 
@@ -112,16 +113,23 @@ const seasonColumns: Column<LeaderRow>[] = [
   { header: 'rides', align: 'right', value: (row) => String(row.rides) },
 ];
 
+export function leaderboardDocument(report: LeaderboardReport): ReportDocument {
+  return {
+    title: `vertical leaderboard  ${report.from} to ${report.to}`,
+    sections: [
+      tableSection(report.bestDays, dayColumns, {
+        heading: 'biggest days',
+        emptyNote: 'nobody skied in this period',
+      }),
+      tableSection(report.bestSeasons, seasonColumns, {
+        heading: 'biggest seasons',
+        emptyNote: 'nobody skied in this period',
+      }),
+    ],
+    footer: [`${report.excludedForMarketing} guests left off, having opted out`],
+  };
+}
+
 export function renderLeaderboard(report: LeaderboardReport): string[] {
-  return [
-    `vertical leaderboard  ${report.from} to ${report.to}`,
-    '',
-    'biggest days',
-    ...indent(renderTable(report.bestDays, dayColumns)),
-    '',
-    'biggest seasons',
-    ...indent(renderTable(report.bestSeasons, seasonColumns)),
-    '',
-    `${report.excludedForMarketing} guests left off, having opted out`,
-  ];
+  return renderDocument(leaderboardDocument(report));
 }

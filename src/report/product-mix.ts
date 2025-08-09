@@ -1,7 +1,8 @@
 import { operatingDateRange, type OperatingDate } from '../util/clock.js';
 import { groupBy, sumBy } from '../util/collect.js';
 import { formatMoney, cents, ZERO, type Cents } from '../util/money.js';
-import { indent, renderTable, type Column } from '../util/table.js';
+import type { Column } from '../util/table.js';
+import { renderDocument, tableSection, type ReportDocument } from './writer.js';
 import type { RevenueContext } from '../service/revenue.js';
 import { productRevenue } from '../service/revenue.js';
 import type { RideStore } from '../storage/repository/rides.js';
@@ -90,14 +91,16 @@ const columns: Column<ProductMixRow>[] = [
   { header: 'per_visit', align: 'right', value: (row) => formatMoney(row.perVisit) },
 ];
 
+export function productMixDocument(report: ProductMixReport): ReportDocument {
+  return {
+    title: `product mix  ${report.from} to ${report.to}`,
+    sections: [tableSection(report.rows, columns, { emptyNote: 'nobody skied in this period' })],
+    footer: [`${report.totalVisits} visits worth ${formatMoney(report.totalValue)}`],
+  };
+}
+
 export function renderProductMix(report: ProductMixReport): string[] {
-  return [
-    `product mix  ${report.from} to ${report.to}`,
-    '',
-    ...indent(renderTable(report.rows, columns)),
-    '',
-    `${report.totalVisits} visits worth ${formatMoney(report.totalValue)}`,
-  ];
+  return renderDocument(productMixDocument(report));
 }
 
 /** Products that are a bigger share of the visits than of the money. */

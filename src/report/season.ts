@@ -2,7 +2,8 @@ import { operatingDateRange, type OperatingDate } from '../util/clock.js';
 import { groupBy, sumBy } from '../util/collect.js';
 import { cents, formatMoney, type Cents } from '../util/money.js';
 import type { DayClass } from '../domain/calendar/season.js';
-import { indent, renderPairs, renderTable, type Column } from '../util/table.js';
+import type { Column } from '../util/table.js';
+import { pairsSection, renderDocument, tableSection, type ReportDocument } from './writer.js';
 import { daySummaries, type QueryContext } from '../service/query.js';
 import { seasonTotal, type RevenueContext } from '../service/revenue.js';
 
@@ -105,26 +106,32 @@ function bestDayLine(report: SeasonReport): string {
   return `${report.bestDate} (${report.bestVisits})`;
 }
 
+export function seasonDocument(report: SeasonReport): ReportDocument {
+  return {
+    title: `season to date  ${report.from} to ${report.to}`,
+    sections: [
+      pairsSection([
+        ['calendar days', String(report.calendarDays)],
+        ['scheduled days', String(report.scheduledDays)],
+        ['days lost', String(report.daysLost)],
+        ['days with traffic', String(report.daysOpen)],
+        ['skier visits', String(report.skierVisits)],
+        ['average a day', String(report.averageVisits)],
+        ['rides', String(report.rides)],
+        ['vertical feet', report.verticalFt.toLocaleString('en-US')],
+        ['revenue', formatMoney(report.revenue)],
+        ['best day', bestDayLine(report)],
+      ]),
+      tableSection(report.byClass, columns, {
+        heading: 'by day class',
+        emptyNote: 'the area was never scheduled in this period',
+      }),
+    ],
+  };
+}
+
 export function renderSeasonReport(report: SeasonReport): string[] {
-  return [
-    `season to date  ${report.from} to ${report.to}`,
-    '',
-    ...renderPairs([
-      ['calendar days', String(report.calendarDays)],
-      ['scheduled days', String(report.scheduledDays)],
-      ['days lost', String(report.daysLost)],
-      ['days with traffic', String(report.daysOpen)],
-      ['skier visits', String(report.skierVisits)],
-      ['average a day', String(report.averageVisits)],
-      ['rides', String(report.rides)],
-      ['vertical feet', report.verticalFt.toLocaleString('en-US')],
-      ['revenue', formatMoney(report.revenue)],
-      ['best day', bestDayLine(report)],
-    ]),
-    '',
-    'by day class',
-    ...indent(renderTable(report.byClass, columns)),
-  ];
+  return renderDocument(seasonDocument(report));
 }
 
 export function revenuePerVisit(report: SeasonReport): Cents {

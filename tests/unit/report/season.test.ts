@@ -66,10 +66,10 @@ describe('rendering the season report', () => {
 
   it('lays the headline out as pairs', () => {
     const lines = renderSeasonReport(report());
-    expect(lines.some((line) => line.startsWith('days lost'))).toBe(true);
-    expect(lines.some((line) => line.startsWith('best day') && line.includes('2025-01-13'))).toBe(
-      true,
-    );
+    expect(lines.some((line) => line.trimStart().startsWith('days lost'))).toBe(true);
+    expect(
+      lines.some((line) => line.trimStart().startsWith('best day') && line.includes('2025-01-13')),
+    ).toBe(true);
   });
 
   it('says so when there is no best day yet', () => {

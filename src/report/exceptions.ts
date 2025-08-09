@@ -1,6 +1,7 @@
 import { operatingDateRange, type OperatingDate } from '../util/clock.js';
 import { tallyBy } from '../util/collect.js';
-import { indent, renderTable, truncate, type Column } from '../util/table.js';
+import { truncate, type Column } from '../util/table.js';
+import { renderDocument, tableSection, type ReportDocument } from './writer.js';
 import type {
   Disposition,
   ExceptionKind,
@@ -62,22 +63,21 @@ const columns: Column<ExceptionRow>[] = [
   { header: 'by', maxWidth: 8, value: (row) => row.decidedBy ?? '' },
 ];
 
+export function exceptionDocument(report: ExceptionReport): ReportDocument {
+  const footer =
+    report.repeatSubjects.length === 0
+      ? []
+      : [`confirmed more than once: ${report.repeatSubjects.join(', ')}`];
+  return {
+    title: `exception register  ${report.from} to ${report.to}`,
+    subtitle: `${report.openCount} open, ${report.staleCount} of those older than ${STALE_AFTER_DAYS} days`,
+    sections: [tableSection(report.rows, columns, { emptyNote: 'nothing to look at' })],
+    footer,
+  };
+}
+
 export function renderExceptionReport(report: ExceptionReport): string[] {
-  const lines: string[] = [
-    `exception register  ${report.from} to ${report.to}`,
-    `${report.openCount} open, ${report.staleCount} of those older than ${STALE_AFTER_DAYS} days`,
-    '',
-  ];
-  if (report.rows.length === 0) {
-    lines.push('  nothing to look at');
-    return lines;
-  }
-  lines.push(...indent(renderTable(report.rows, columns)));
-  if (report.repeatSubjects.length > 0) {
-    lines.push('');
-    lines.push(`confirmed more than once: ${report.repeatSubjects.join(', ')}`);
-  }
-  return lines;
+  return renderDocument(exceptionDocument(report));
 }
 
 /** What the morning sheet prints in one line. */
