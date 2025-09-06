@@ -1,4 +1,5 @@
 import { SequenceLedger } from '../../src/ingest/envelope.js';
+import { addRideRoutes } from '../../src/api/ride-routes.js';
 import { addScanRoutes } from '../../src/api/scan-routes.js';
 import { Router } from '../../src/api/router.js';
 import { recomputeDates } from '../../src/service/recompute.js';
@@ -35,6 +36,11 @@ export function apiHarness(): ApiHarness {
       sequences: new SequenceLedger(),
       receivedAt: new Date('2025-01-13T23:59:00Z'),
     },
+  });
+  addRideRoutes(router, {
+    rides: system.rides,
+    guests: { reference: system.reference, rides: system.rides, asOf: day('2025-01-15') },
+    recompute: system,
   });
   return { router, system };
 }
