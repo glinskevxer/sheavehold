@@ -1,4 +1,6 @@
+import { ExceptionRegister } from '../../src/domain/exception/register.js';
 import { SequenceLedger } from '../../src/ingest/envelope.js';
+import { addReportRoutes } from '../../src/api/report-routes.js';
 import { addRideRoutes } from '../../src/api/ride-routes.js';
 import { addScanRoutes } from '../../src/api/scan-routes.js';
 import { Router } from '../../src/api/router.js';
@@ -41,6 +43,21 @@ export function apiHarness(): ApiHarness {
     rides: system.rides,
     guests: { reference: system.reference, rides: system.rides, asOf: day('2025-01-15') },
     recompute: system,
+  });
+  const daily = {
+    rides: system.rides,
+    scans: system.scans,
+    calendar: system.calendar,
+    lifts: system.lifts,
+    reference: system.reference,
+    register: new ExceptionRegister(),
+    generatedAt: new Date('2025-01-14T15:00:00Z'),
+  };
+  addReportRoutes(router, {
+    daily,
+    season: daily,
+    mix: daily,
+    seasonOpensOn: '2024-11-22',
   });
   return { router, system };
 }
