@@ -1,5 +1,6 @@
 import { err, ok, type Result } from '../util/result.js';
-import { problem, type ApiResponse } from './router.js';
+import { fail } from './problems.js';
+import type { ApiResponse } from './router.js';
 
 /**
  * A busy Saturday is forty thousand rides and the front end asked for a whole
@@ -33,10 +34,10 @@ export function readPageRequest(
   if (rawLimit !== undefined && rawLimit !== '') {
     const parsed = Number(rawLimit);
     if (!Number.isInteger(parsed) || parsed < 1) {
-      return err(problem(400, 'bad_limit', `limit ${rawLimit} is not a whole number above zero`));
+      return err(fail('bad_limit', `limit ${rawLimit} is not a whole number above zero`));
     }
     if (parsed > MAX_PAGE_SIZE) {
-      return err(problem(400, 'limit_too_large', `limit is capped at ${MAX_PAGE_SIZE}`));
+      return err(fail('limit_too_large', `limit is capped at ${MAX_PAGE_SIZE}`));
     }
     limit = parsed;
   }

@@ -3,7 +3,8 @@ import { parseMediaSerial, parseTerminalId } from '../util/ids.js';
 import type { NormalisedScan } from '../domain/scan/normalise.js';
 import { ingestUpload, type IngestContext } from '../service/ingest.js';
 import type { ScanStore, StoredBatch } from '../storage/repository/scans.js';
-import { ok, problem, type Router } from './router.js';
+import { fail } from './problems.js';
+import { ok, type Router } from './router.js';
 
 /**
  * Everything about the raw stream. These are the only routes the gate uploader
@@ -64,7 +65,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     summary: 'every scan on one operating day',
     handler: ({ params }) => {
       const date = parseOperatingDate(params.date ?? '');
-      if (!date.ok) return problem(400, 'bad_date', date.error);
+      if (!date.ok) return fail('bad_date', date.error);
       return ok({ date: date.value, scans: context.scans.onDate(date.value).map(toScanWire) });
     },
   });
@@ -75,7 +76,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     summary: 'every scan a card has ever made',
     handler: ({ params }) => {
       const serial = parseMediaSerial(params.serial ?? '');
-      if (!serial.ok) return problem(400, 'bad_media', serial.error);
+      if (!serial.ok) return fail('bad_media', serial.error);
       return ok({
         media: serial.value,
         scans: context.scans.ofMedia(serial.value).map(toScanWire),
@@ -89,7 +90,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     summary: 'every scan one gate has sent',
     handler: ({ params }) => {
       const terminal = parseTerminalId(params.terminal ?? '');
-      if (!terminal.ok) return problem(400, 'bad_terminal', terminal.error);
+      if (!terminal.ok) return fail('bad_terminal', terminal.error);
       return ok({
         terminal: terminal.value,
         scans: context.scans.onTerminal(terminal.value).map(toScanWire),
@@ -110,7 +111,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     summary: 'one upload',
     handler: ({ params }) => {
       const batch = context.scans.batches.get(params.batch ?? '');
-      if (batch === undefined) return problem(404, 'no_batch', `no batch ${params.batch ?? ''}`);
+      if (batch === undefined) return fail('no_batch', `no batch ${params.batch ?? ''}`);
       return ok(toBatchWire(batch));
     },
   });
@@ -122,10 +123,10 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     scope: 'ingest',
     handler: ({ body }) => {
       if (typeof body !== 'string' || body.trim() === '') {
-        return problem(400, 'empty_upload', 'the body must be the upload file');
+        return fail('empty_upload', 'the body must be the upload file');
       }
       const receipt = ingestUpload(body, context.ingest);
-      if (!receipt.ok) return problem(422, 'unreadable_upload', receipt.error);
+      if (!receipt.ok) return fail('unreadable_upload', receipt.error);
       return ok(
         {
           batch: receipt.value.batchId,

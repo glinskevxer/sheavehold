@@ -5,7 +5,8 @@ import type { Visit } from '../domain/visit/visit.js';
 import { guestHistory, type GuestQueryContext } from '../service/guest-query.js';
 import { recomputeDate, type RecomputeContext } from '../service/recompute.js';
 import type { RideStore } from '../storage/repository/rides.js';
-import { ok, problem, type Router } from './router.js';
+import { fail } from './problems.js';
+import { ok, type Router } from './router.js';
 
 /**
  * Rides and visits, which is what everything except the uploader actually
@@ -59,7 +60,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     summary: 'every ride on one operating day',
     handler: ({ params }) => {
       const date = parseOperatingDate(params.date ?? '');
-      if (!date.ok) return problem(400, 'bad_date', date.error);
+      if (!date.ok) return fail('bad_date', date.error);
       return ok({ date: date.value, rides: context.rides.ridesOn(date.value).map(toRideWire) });
     },
   });
@@ -70,9 +71,9 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     summary: 'every ride on one lift on one day',
     handler: ({ params }) => {
       const lift = parseLiftCode(params.lift ?? '');
-      if (!lift.ok) return problem(400, 'bad_lift', lift.error);
+      if (!lift.ok) return fail('bad_lift', lift.error);
       const date = parseOperatingDate(params.date ?? '');
-      if (!date.ok) return problem(400, 'bad_date', date.error);
+      if (!date.ok) return fail('bad_date', date.error);
       return ok({
         lift: lift.value,
         date: date.value,
@@ -87,7 +88,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     summary: 'every visit on one operating day',
     handler: ({ params }) => {
       const date = parseOperatingDate(params.date ?? '');
-      if (!date.ok) return problem(400, 'bad_date', date.error);
+      if (!date.ok) return fail('bad_date', date.error);
       return ok({
         date: date.value,
         skierVisits: context.rides.skierVisitsOn(date.value),
@@ -102,7 +103,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     summary: 'what a guest is carrying and where they have been',
     handler: ({ params }) => {
       const history = guestHistory(params.guest ?? '', context.guests);
-      if (history === undefined) return problem(404, 'no_guest', `no guest ${params.guest ?? ''}`);
+      if (history === undefined) return fail('no_guest', `no guest ${params.guest ?? ''}`);
       return ok({
         guest: history.guest.id,
         name: history.name,
@@ -130,7 +131,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     scope: 'write',
     handler: ({ params }) => {
       const date = parseOperatingDate(params.date ?? '');
-      if (!date.ok) return problem(400, 'bad_date', date.error);
+      if (!date.ok) return fail('bad_date', date.error);
       const result = recomputeDate(date.value, context.recompute);
       return ok(
         {

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { parseOperatingDate, type OperatingDate } from '../util/clock.js';
 import { err, ok, type Result } from '../util/result.js';
-import { problem, type ApiResponse } from './router.js';
+import { fail } from './problems.js';
+import type { ApiResponse } from './router.js';
 
 /**
  * Every route used to open with the same six lines of hand rolled checking and
@@ -28,7 +29,7 @@ export function readBody<T>(schema: z.ZodType<T>, body: unknown): Result<T, ApiR
   const parsed = schema.safeParse(body);
   if (parsed.success) return ok(parsed.data);
   const found = firstProblem(parsed.error);
-  return err(problem(422, 'invalid_body', `${found.field}: ${found.message}`));
+  return err(fail('invalid_body', `${found.field}: ${found.message}`));
 }
 
 export function readDate(
@@ -36,10 +37,10 @@ export function readDate(
   field = 'date',
 ): Result<OperatingDate, ApiResponse> {
   if (raw === undefined || raw === '') {
-    return err(problem(400, 'missing_parameter', `${field} is required`));
+    return err(fail('missing_parameter', `${field} is required`));
   }
   const parsed = parseOperatingDate(raw);
-  if (!parsed.ok) return err(problem(400, 'bad_date', `${field}: ${parsed.error}`));
+  if (!parsed.ok) return err(fail('bad_date', `${field}: ${parsed.error}`));
   return ok(parsed.value);
 }
 
@@ -52,7 +53,7 @@ export function readPeriod(
   const end = readDate(to, 'to');
   if (!end.ok) return end;
   if (end.value < start.value) {
-    return err(problem(400, 'reversed_period', 'to is before from'));
+    return err(fail('reversed_period', 'to is before from'));
   }
   return ok({ from: start.value, to: end.value });
 }
