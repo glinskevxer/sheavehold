@@ -58,7 +58,7 @@ describe('describing the whole router', () => {
   });
 
   it('lists the scopes in use', () => {
-    expect(scopesUsed(router())).toEqual(['ingest', 'write']);
+    expect(scopesUsed(router())).toEqual(['ingest', 'supervise', 'write']);
     expect(scopesUsed(new Router())).toEqual([]);
   });
 

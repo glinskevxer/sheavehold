@@ -8,7 +8,7 @@ describe('reading scans', () => {
   it('gives a day of scans', () => {
     const response = get('/scans/day/2025-01-13');
     expect(response.status).toBe(200);
-    expect((response.body as { scans: unknown[] }).scans).toHaveLength(3);
+    expect((response.body as { scans: unknown[] }).scans).toHaveLength(4);
   });
 
   it('gives an empty day rather than a not found', () => {

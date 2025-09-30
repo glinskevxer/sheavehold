@@ -8,7 +8,7 @@ describe('reading rides', () => {
     const response = get('/rides/day/2025-01-13');
     expect(response.status).toBe(200);
     const rides = (response.body as { rides: Record<string, unknown>[] }).rides;
-    expect(rides).toHaveLength(3);
+    expect(rides).toHaveLength(4);
     expect(Object.keys(rides[0] ?? {})).toEqual([
       'id',
       'date',
@@ -103,7 +103,7 @@ describe('rebuilding a day', () => {
   it('rebuilds and reports what it did', () => {
     const response = post('/rides/day/2025-01-13/recompute');
     expect(response.status).toBe(202);
-    expect(response.body).toMatchObject({ date: '2025-01-13', scans: 3, rides: 3, visits: 2 });
+    expect(response.body).toMatchObject({ date: '2025-01-13', scans: 4, rides: 4, visits: 2 });
   });
 
   it('refuses a bad date', () => {
