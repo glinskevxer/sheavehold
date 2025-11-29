@@ -1,5 +1,4 @@
 import type { Command } from 'commander';
-import { parseOperatingDate } from '../../util/clock.js';
 import { buildExceptionReport, renderExceptionReport } from '../../report/exceptions.js';
 import { applyOverride, scanDateForExceptions } from '../../service/exceptions.js';
 import { isDisposition } from '../../domain/exception/register.js';
@@ -7,6 +6,7 @@ import { renderPairs } from '../../util/table.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
+import { readDateArg, readPeriodArgs } from '../period.js';
 
 /**
  * The supervisor commands. Deciding refuses to run without a name, and the
@@ -35,19 +35,9 @@ export function addExceptionsCommand(program: Command, app: CliApp, output: Outp
     .argument('<to>', 'last operating date')
     .option('--open', 'only the findings nobody has decided')
     .action((rawFrom: string, rawTo: string, options: { open?: boolean }) => {
-      const from = parseOperatingDate(rawFrom);
-      const to = parseOperatingDate(rawTo);
-      if (!from.ok) {
-        output.error(from.error);
-        markFailed(program);
-        return;
-      }
-      if (!to.ok) {
-        output.error(to.error);
-        markFailed(program);
-        return;
-      }
-      const report = buildExceptionReport(from.value, to.value, app.register, to.value);
+      const period = readPeriodArgs(rawFrom, rawTo, program, output);
+      if (period === undefined) return;
+      const report = buildExceptionReport(period.from, period.to, app.register, period.to);
       const filtered =
         options.open === true
           ? { ...report, rows: report.rows.filter((row) => row.disposition === 'open') }
@@ -60,13 +50,9 @@ export function addExceptionsCommand(program: Command, app: CliApp, output: Outp
     .description('run the fraud rules over a day again')
     .argument('<date>', 'operating date')
     .action((raw: string) => {
-      const date = parseOperatingDate(raw);
-      if (!date.ok) {
-        output.error(date.error);
-        markFailed(program);
-        return;
-      }
-      const result = scanDateForExceptions(date.value, scanContext(app));
+      const date = readDateArg(raw, program, output);
+      if (date === undefined) return;
+      const result = scanDateForExceptions(date, scanContext(app));
       output.lines(
         renderPairs([
           ['date', result.date],

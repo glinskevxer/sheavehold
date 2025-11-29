@@ -1,5 +1,4 @@
 import type { Command } from 'commander';
-import { parseOperatingDate } from '../../util/clock.js';
 import { formatMoney } from '../../util/money.js';
 import { byDayClass, byRides, byVertical } from '../../domain/revenue/weighting.js';
 import type { WeightRule } from '../../domain/revenue/attribution.js';
@@ -9,6 +8,7 @@ import type { DayRevenue, PassValueLine, ProductRevenue } from '../../service/re
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
+import { readPeriodArgs } from '../period.js';
 
 /**
  * The finance commands. The weighting is a flag rather than a setting because
@@ -61,18 +61,8 @@ export function addRevenueCommand(program: Command, app: CliApp, output: Output)
     .argument('<to>', 'last operating date')
     .option('--weighting <name>', `one of ${WEIGHTINGS.join(', ')}`, 'even')
     .action((rawFrom: string, rawTo: string, options: { weighting: string }) => {
-      const from = parseOperatingDate(rawFrom);
-      if (!from.ok) {
-        output.error(from.error);
-        markFailed(program);
-        return;
-      }
-      const to = parseOperatingDate(rawTo);
-      if (!to.ok) {
-        output.error(to.error);
-        markFailed(program);
-        return;
-      }
+      const period = readPeriodArgs(rawFrom, rawTo, program, output);
+      if (period === undefined) return;
       if (!(WEIGHTINGS as readonly string[]).includes(options.weighting)) {
         output.error(`${options.weighting} is not a weighting`);
         markFailed(program);
@@ -80,12 +70,12 @@ export function addRevenueCommand(program: Command, app: CliApp, output: Output)
       }
       const weight = weightingNamed(app, options.weighting);
       const rows = dayRevenue(
-        from.value,
-        to.value,
+        period.from,
+        period.to,
         context,
         weight === undefined ? {} : { weight },
       );
-      output.line(`revenue ${from.value} to ${to.value}, split ${options.weighting}`);
+      output.line(`revenue ${period.from} to ${period.to}, split ${options.weighting}`);
       output.lines(renderTable(rows, dayColumns));
     });
 

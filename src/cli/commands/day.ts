@@ -1,5 +1,4 @@
 import type { Command } from 'commander';
-import { parseOperatingDate } from '../../util/clock.js';
 import { buildDailyReport } from '../../report/daily.js';
 import { renderDailyCsv } from '../../report/csv.js';
 import { renderDailyJson } from '../../report/json.js';
@@ -8,6 +7,7 @@ import { recomputeDate } from '../../service/recompute.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
+import { readDateArg } from '../period.js';
 
 /**
  * `sheavehold day <date>` is the command anybody in the ops office actually
@@ -56,19 +56,15 @@ export function addDayCommand(program: Command, app: CliApp, output: Output): vo
     .option('--rebuild', 'recompute the day before printing it')
     .option('--out <file>', 'write to a file instead of the terminal')
     .action((raw: string, options: DayOptions) => {
-      const date = parseOperatingDate(raw);
-      if (!date.ok) {
-        output.error(date.error);
-        markFailed(program);
-        return;
-      }
+      const date = readDateArg(raw, program, output);
+      if (date === undefined) return;
 
       if (options.rebuild === true) {
-        const result = recomputeDate(date.value, recomputeContext(app));
+        const result = recomputeDate(date, recomputeContext(app));
         output.line(`rebuilt ${result.date} to ${result.rides.length} rides`);
       }
 
-      const report = buildDailyReport(date.value, dailyContext(app));
+      const report = buildDailyReport(date, dailyContext(app));
       const format = options.format ?? 'text';
       let body: string;
       if (format === 'json') body = renderDailyJson(report, true);
