@@ -57,7 +57,7 @@ export function daySummary(date: OperatingDate, context: QueryContext): DaySumma
     scans: context.scans.countOnDate(date),
     liftsTurning: distinctSorted(rides, (ride) => ride.lift).length,
     firstRideAt: rides[0]?.boardedAt,
-    lastRideAt: rides[rides.length - 1]?.boardedAt,
+    lastRideAt: rides.at(-1)?.boardedAt,
     ridesPerVisit: visits.length === 0 ? 0 : Math.round((rides.length / visits.length) * 10) / 10,
     verticalPerVisit: skierVisits === 0 ? 0 : Math.round(vertical / skierVisits),
     productMix: tallyBy(visits, (visit) => visit.productCode),

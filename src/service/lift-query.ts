@@ -61,7 +61,7 @@ export function liftDayRow(lift: Lift, rides: readonly Ride[], dayTotal: number)
     verticalFt: sumBy(own, (ride) => ride.verticalFt),
     riseFt: verticalRiseFt(lift),
     firstRideAt: own[0]?.boardedAt,
-    lastRideAt: own[own.length - 1]?.boardedAt,
+    lastRideAt: own.at(-1)?.boardedAt,
     busiestHourStart: hour.start,
     busiestHourRides: hour.count,
     shareOfRides: dayTotal === 0 ? 0 : Math.round((own.length / dayTotal) * 1000) / 10,

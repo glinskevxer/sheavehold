@@ -51,7 +51,7 @@ export function visitId(date: OperatingDate, guestId: string, entitlementId: str
 
 function sessionOf(rides: readonly Ride[]): Session {
   const first = rides[0];
-  const last = rides[rides.length - 1];
+  const last = rides.at(-1);
   if (first === undefined || last === undefined) {
     throw new Error('a session cannot be built from no rides');
   }
@@ -98,7 +98,7 @@ export function buildVisits(rides: readonly Ride[], options: VisitOptions = {}):
   for (const [id, own] of groups) {
     const ordered = [...own].sort(compareRides);
     const first = ordered[0];
-    const last = ordered[ordered.length - 1];
+    const last = ordered.at(-1);
     if (first === undefined || last === undefined) continue;
     visits.push({
       id,

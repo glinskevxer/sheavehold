@@ -145,7 +145,7 @@ export function verticalPerHour(rides: readonly Ride[]): number {
   if (rides.length < 2) return 0;
   const ordered = [...rides].sort(compareRides);
   const first = ordered[0];
-  const last = ordered[ordered.length - 1];
+  const last = ordered.at(-1);
   if (first === undefined || last === undefined) return 0;
   const hours = (last.boardedAt.getTime() - first.boardedAt.getTime()) / 3_600_000;
   if (hours <= 0) return 0;

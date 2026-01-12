@@ -5,5 +5,12 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     environment: 'node',
     restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: 'coverage',
+      reporter: ['text-summary', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/cli/entry.ts'],
+    },
   },
 });

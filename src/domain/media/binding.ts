@@ -107,13 +107,7 @@ export class BindingLedger {
   }
 
   resolve(serial: MediaSerial, at: Date): Binding | undefined {
-    const history = this.bySerial.get(serial);
-    if (history === undefined) return undefined;
-    for (let i = history.length - 1; i >= 0; i -= 1) {
-      const binding = history[i];
-      if (binding !== undefined && bindingCovers(binding, at)) return binding;
-    }
-    return undefined;
+    return this.bySerial.get(serial)?.findLast((binding) => bindingCovers(binding, at));
   }
 
   history(serial: MediaSerial): readonly Binding[] {

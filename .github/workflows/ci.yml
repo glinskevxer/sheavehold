@@ -51,6 +51,27 @@ jobs:
       - name: tests
         run: npm test
 
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+          cache: npm
+      - run: npm ci
+      - name: coverage
+        run: npm run coverage
+      - name: keep the report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
   build:
     name: the package builds and the cli runs
     runs-on: ubuntu-latest

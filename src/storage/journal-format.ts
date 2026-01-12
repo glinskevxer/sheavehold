@@ -113,7 +113,7 @@ export function decodeJournal(text: string): DecodedJournal {
     if (!decoded.ok) {
       return { records, stoppedAtLine: i + 1, stopReason: decoded.error };
     }
-    const previous = records[records.length - 1];
+    const previous = records.at(-1);
     if (previous !== undefined && decoded.value.sequence <= previous.sequence) {
       return {
         records,
