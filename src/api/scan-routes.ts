@@ -64,7 +64,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     path: '/scans/day/:date',
     summary: 'every scan on one operating day',
     handler: ({ params }) => {
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
       return ok({ date: date.value, scans: context.scans.onDate(date.value).map(toScanWire) });
     },
@@ -75,7 +75,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     path: '/scans/media/:serial',
     summary: 'every scan a card has ever made',
     handler: ({ params }) => {
-      const serial = parseMediaSerial(params.serial ?? '');
+      const serial = parseMediaSerial(params['serial'] ?? '');
       if (!serial.ok) return fail('bad_media', serial.error);
       return ok({
         media: serial.value,
@@ -89,7 +89,7 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     path: '/scans/terminal/:terminal',
     summary: 'every scan one gate has sent',
     handler: ({ params }) => {
-      const terminal = parseTerminalId(params.terminal ?? '');
+      const terminal = parseTerminalId(params['terminal'] ?? '');
       if (!terminal.ok) return fail('bad_terminal', terminal.error);
       return ok({
         terminal: terminal.value,
@@ -110,8 +110,8 @@ export function addScanRoutes(router: Router, context: ScanRouteContext): Router
     path: '/batches/:batch',
     summary: 'one upload',
     handler: ({ params }) => {
-      const batch = context.scans.batches.get(params.batch ?? '');
-      if (batch === undefined) return fail('no_batch', `no batch ${params.batch ?? ''}`);
+      const batch = context.scans.batches.get(params['batch'] ?? '');
+      if (batch === undefined) return fail('no_batch', `no batch ${params['batch'] ?? ''}`);
       return ok(toBatchWire(batch));
     },
   });

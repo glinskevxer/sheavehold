@@ -64,7 +64,7 @@ describe('reading an upload', () => {
   it('refuses a file whose envelope will not build', () => {
     const lines = file.split('\n');
     const head = JSON.parse(lines[0]!) as Record<string, unknown>;
-    head.terminal = 'SUNB';
+    head['terminal'] = 'SUNB';
     expect(isErr(readUploadFile([JSON.stringify(head), ...lines.slice(1)].join('\n')))).toBe(true);
   });
 

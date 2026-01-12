@@ -42,7 +42,7 @@ export function addExceptionRoutes(router: Router, context: ExceptionRouteContex
     path: '/exceptions',
     summary: 'the register, paged, oldest first',
     handler: ({ query }) => {
-      const period = readPeriod(query.from, query.to);
+      const period = readPeriod(query['from'], query['to']);
       if (!period.ok) return period.error;
       const page = readPageRequest(query);
       if (!page.ok) return page.error;
@@ -51,7 +51,7 @@ export function addExceptionRoutes(router: Router, context: ExceptionRouteContex
         .filter(
           (row) => row.operatingDate >= period.value.from && row.operatingDate <= period.value.to,
         )
-        .filter((row) => query.state === undefined || row.disposition === query.state);
+        .filter((row) => query['state'] === undefined || row.disposition === query['state']);
       return ok(
         pageBody(
           paginate(rows, page.value, (row) => row.id),
@@ -66,8 +66,8 @@ export function addExceptionRoutes(router: Router, context: ExceptionRouteContex
     path: '/exceptions/:id',
     summary: 'one finding',
     handler: ({ params }) => {
-      const row = context.register.get(params.id ?? '');
-      if (row === undefined) return fail('no_exception', `no exception ${params.id ?? ''}`);
+      const row = context.register.get(params['id'] ?? '');
+      if (row === undefined) return fail('no_exception', `no exception ${params['id'] ?? ''}`);
       return ok(toExceptionWire(row));
     },
   });
@@ -112,7 +112,7 @@ export function addExceptionRoutes(router: Router, context: ExceptionRouteContex
     summary: 'run the fraud rules over one day again',
     scope: 'write',
     handler: ({ params }) => {
-      const date = readDate(params.date);
+      const date = readDate(params['date']);
       if (!date.ok) return date.error;
       const result = scanDateForExceptions(date.value, context.scan);
       return ok(

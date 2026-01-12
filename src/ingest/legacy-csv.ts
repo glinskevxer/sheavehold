@@ -51,12 +51,12 @@ export function readLegacyExport(text: string, options: LegacyOptions): Result<L
 
   for (const record of table.value.records) {
     const where = { file: options.file, line: record.line };
-    const printed = parsePrintedId(record.values.CARDNO ?? '');
+    const printed = parsePrintedId(record.values['CARDNO'] ?? '');
     if (!printed.ok) {
       diagnostics.error('legacy.bad_card', printed.error, {}, where);
       continue;
     }
-    const stamp = (record.values.STAMP ?? '').trim();
+    const stamp = (record.values['STAMP'] ?? '').trim();
     const at = new Date(`${stamp.replace(' ', 'T')}Z`);
     if (Number.isNaN(at.getTime())) {
       diagnostics.error(
@@ -77,7 +77,7 @@ export function readLegacyExport(text: string, options: LegacyOptions): Result<L
       );
       continue;
     }
-    const code = (record.values.RES ?? '').trim().toUpperCase();
+    const code = (record.values['RES'] ?? '').trim().toUpperCase();
     const outcome = OUTCOMES[code];
     if (outcome === undefined) {
       diagnostics.error(
@@ -89,13 +89,13 @@ export function readLegacyExport(text: string, options: LegacyOptions): Result<L
       continue;
     }
     const scan = makeRawScan({
-      terminal: record.values.GATE ?? '',
+      terminal: record.values['GATE'] ?? '',
       media: serial,
       at: at.toISOString(),
-      seq: Number(record.values.CNT ?? Number.NaN),
+      seq: Number(record.values['CNT'] ?? Number.NaN),
       outcome,
       reason: code === 'OK' || code === 'PASS' ? '' : code.toLowerCase(),
-      rssi: Number(record.values.DBM ?? Number.NaN),
+      rssi: Number(record.values['DBM'] ?? Number.NaN),
       antenna: 1,
     });
     if (!scan.ok) {

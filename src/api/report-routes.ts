@@ -48,10 +48,11 @@ export function addReportRoutes(router: Router, context: ReportRouteContext): Ro
     path: '/reports/daily/:date',
     summary: 'the daily operations report',
     handler: ({ params, query }) => {
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
-      const format = parseFormat(query.format);
-      if (format === undefined) return fail('bad_format', `${query.format ?? ''} is not a format`);
+      const format = parseFormat(query['format']);
+      if (format === undefined)
+        return fail('bad_format', `${query['format'] ?? ''} is not a format`);
       const report = buildDailyReport(date.value, context.daily);
       if (format === 'text') return textResponse(renderDailyReport(report).split('\n'));
       if (format === 'csv') return csvResponse(renderDailyCsv(report).summary);
@@ -64,11 +65,11 @@ export function addReportRoutes(router: Router, context: ReportRouteContext): Ro
     path: '/reports/season',
     summary: 'season to date',
     handler: ({ query }) => {
-      const from = parseOperatingDate(query.from ?? context.seasonOpensOn);
+      const from = parseOperatingDate(query['from'] ?? context.seasonOpensOn);
       if (!from.ok) return fail('bad_date', from.error);
-      const to = parseOperatingDate(query.to ?? '');
+      const to = parseOperatingDate(query['to'] ?? '');
       if (!to.ok) return fail('bad_date', to.error);
-      const format = parseFormat(query.format);
+      const format = parseFormat(query['format']);
       if (format === undefined) return fail('bad_format', 'unknown format');
       const report = buildSeasonReport(from.value, to.value, context.season);
       if (format === 'text') return textResponse(renderSeasonReport(report));
@@ -92,12 +93,12 @@ export function addReportRoutes(router: Router, context: ReportRouteContext): Ro
     path: '/reports/utilisation',
     summary: 'lift utilisation over a period',
     handler: ({ query }) => {
-      const from = parseOperatingDate(query.from ?? '');
+      const from = parseOperatingDate(query['from'] ?? '');
       if (!from.ok) return fail('bad_date', from.error);
-      const to = parseOperatingDate(query.to ?? '');
+      const to = parseOperatingDate(query['to'] ?? '');
       if (!to.ok) return fail('bad_date', to.error);
       const report = buildUtilisationReport(from.value, to.value, context.daily);
-      if (parseFormat(query.format) === 'text')
+      if (parseFormat(query['format']) === 'text')
         return textResponse(renderUtilisationReport(report));
       return ok({
         from: report.from,
@@ -113,12 +114,12 @@ export function addReportRoutes(router: Router, context: ReportRouteContext): Ro
     path: '/reports/products',
     summary: 'product mix over a period',
     handler: ({ query }) => {
-      const from = parseOperatingDate(query.from ?? '');
+      const from = parseOperatingDate(query['from'] ?? '');
       if (!from.ok) return fail('bad_date', from.error);
-      const to = parseOperatingDate(query.to ?? '');
+      const to = parseOperatingDate(query['to'] ?? '');
       if (!to.ok) return fail('bad_date', to.error);
       const report = buildProductMix(from.value, to.value, context.mix);
-      if (parseFormat(query.format) === 'text') return textResponse(renderProductMix(report));
+      if (parseFormat(query['format']) === 'text') return textResponse(renderProductMix(report));
       return ok({
         from: report.from,
         to: report.to,

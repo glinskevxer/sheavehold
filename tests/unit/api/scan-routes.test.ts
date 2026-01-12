@@ -56,7 +56,7 @@ describe('reading scans', () => {
       'outcome',
       'weakRead',
     ]);
-    expect(typeof first?.at).toBe('string');
+    expect(typeof first?.['at']).toBe('string');
   });
 });
 

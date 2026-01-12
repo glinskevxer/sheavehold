@@ -22,19 +22,19 @@ describe('the lift table', () => {
 
   it('carries the date on every row', () => {
     const table = expectOk(parseCsvTable(renderLiftCsv(report())), 'csv');
-    expect(table.records.every((record) => record.values.date === '2025-01-13')).toBe(true);
+    expect(table.records.every((record) => record.values['date'] === '2025-01-13')).toBe(true);
   });
 
   it('writes numbers with no grouping', () => {
     const table = expectOk(parseCsvTable(renderLiftCsv(report())), 'csv');
-    expect(table.records[0]?.values.vertical_ft).toBe('3720');
+    expect(table.records[0]?.values['vertical_ft']).toBe('3720');
   });
 
   it('says turned yes or no rather than leaving it blank', () => {
     const table = expectOk(parseCsvTable(renderLiftCsv(report())), 'csv');
-    expect(table.records[0]?.values.turned).toBe('yes');
-    expect(table.records[2]?.values.turned).toBe('no');
-    expect(table.records[2]?.values.rides).toBe('0');
+    expect(table.records[0]?.values['turned']).toBe('yes');
+    expect(table.records[2]?.values['turned']).toBe('no');
+    expect(table.records[2]?.values['rides']).toBe('0');
   });
 
   it('quotes a lift name with a comma in it', () => {
@@ -48,8 +48,8 @@ describe('the hourly table', () => {
   it('gives one row per hour with a label', () => {
     const table = expectOk(parseCsvTable(renderHourCsv(report())), 'csv');
     expect(table.records).toHaveLength(2);
-    expect(table.records[0]?.values.label).toBe('10:00');
-    expect(table.records[0]?.values.hour).toBe('6');
+    expect(table.records[0]?.values['label']).toBe('10:00');
+    expect(table.records[0]?.values['hour']).toBe('6');
   });
 
   it('writes just the header for a day nobody skied', () => {
@@ -60,8 +60,8 @@ describe('the hourly table', () => {
 describe('the summary table', () => {
   it('writes money in cents', () => {
     const table = expectOk(parseCsvTable(renderSummaryCsv([report()])), 'csv');
-    expect(table.records[0]?.values.revenue_cents).toBe('124400');
-    expect(table.records[0]?.values.revenue_per_visit_cents).toBe('62200');
+    expect(table.records[0]?.values['revenue_cents']).toBe('124400');
+    expect(table.records[0]?.values['revenue_per_visit_cents']).toBe('62200');
   });
 
   it('carries the schedule and the counts', () => {
@@ -82,7 +82,10 @@ describe('the summary table', () => {
       parseCsvTable(renderSummaryCsv([report('2025-01-13'), report('2025-01-14')])),
       'csv',
     );
-    expect(table.records.map((record) => record.values.date)).toEqual(['2025-01-13', '2025-01-14']);
+    expect(table.records.map((record) => record.values['date'])).toEqual([
+      '2025-01-13',
+      '2025-01-14',
+    ]);
   });
 });
 

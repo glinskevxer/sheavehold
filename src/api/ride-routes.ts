@@ -59,7 +59,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     path: '/rides/day/:date',
     summary: 'every ride on one operating day',
     handler: ({ params }) => {
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
       return ok({ date: date.value, rides: context.rides.ridesOn(date.value).map(toRideWire) });
     },
@@ -70,9 +70,9 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     path: '/rides/lift/:lift/:date',
     summary: 'every ride on one lift on one day',
     handler: ({ params }) => {
-      const lift = parseLiftCode(params.lift ?? '');
+      const lift = parseLiftCode(params['lift'] ?? '');
       if (!lift.ok) return fail('bad_lift', lift.error);
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
       return ok({
         lift: lift.value,
@@ -87,7 +87,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     path: '/visits/day/:date',
     summary: 'every visit on one operating day',
     handler: ({ params }) => {
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
       return ok({
         date: date.value,
@@ -102,8 +102,8 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     path: '/guests/:guest',
     summary: 'what a guest is carrying and where they have been',
     handler: ({ params }) => {
-      const history = guestHistory(params.guest ?? '', context.guests);
-      if (history === undefined) return fail('no_guest', `no guest ${params.guest ?? ''}`);
+      const history = guestHistory(params['guest'] ?? '', context.guests);
+      if (history === undefined) return fail('no_guest', `no guest ${params['guest'] ?? ''}`);
       return ok({
         guest: history.guest.id,
         name: history.name,
@@ -130,7 +130,7 @@ export function addRideRoutes(router: Router, context: RideRouteContext): Router
     summary: 'rebuild one day from the scans on file',
     scope: 'write',
     handler: ({ params }) => {
-      const date = parseOperatingDate(params.date ?? '');
+      const date = parseOperatingDate(params['date'] ?? '');
       if (!date.ok) return fail('bad_date', date.error);
       const result = recomputeDate(date.value, context.recompute);
       return ok(

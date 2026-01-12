@@ -82,7 +82,7 @@ describe('migration one', () => {
       migrate({ schemaVersion: 0, weather: [{ day: '2025-01-13' }] }, [migration001]),
       'migrate',
     );
-    expect(outcome.state.weather).toEqual([{ day: '2025-01-13' }]);
+    expect(outcome.state['weather']).toEqual([{ day: '2025-01-13' }]);
   });
 
   it('does nothing to a store already at one', () => {

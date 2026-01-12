@@ -89,13 +89,13 @@ describe('reading with a header', () => {
     const table = expectOk(parseCsvTable('lift,rise\nSUNB,1240\nRIDGE,880'), 'table');
     expect(table.header).toEqual(['lift', 'rise']);
     expect(table.records[0]).toEqual({ line: 2, values: { lift: 'SUNB', rise: '1240' } });
-    expect(table.records[1]?.values.rise).toBe('880');
+    expect(table.records[1]?.values['rise']).toBe('880');
   });
 
   it('trims the header names but not the values', () => {
     const table = expectOk(parseCsvTable('lift , rise\n SUNB ,1240'), 'table');
     expect(table.header).toEqual(['lift', 'rise']);
-    expect(table.records[0]?.values.lift).toBe(' SUNB ');
+    expect(table.records[0]?.values['lift']).toBe(' SUNB ');
   });
 
   it('refuses a short row rather than filling it in', () => {

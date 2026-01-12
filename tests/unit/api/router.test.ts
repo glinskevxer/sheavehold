@@ -7,13 +7,13 @@ function router(): Router {
     .add({
       method: 'GET',
       path: '/days/:date',
-      handler: (context: RouteContext) => ok({ date: context.params.date }),
+      handler: (context: RouteContext) => ok({ date: context.params['date'] }),
       summary: 'one day',
     })
     .add({
       method: 'POST',
       path: '/days/:date/recompute',
-      handler: (context) => ok({ rebuilt: context.params.date }, 202),
+      handler: (context) => ok({ rebuilt: context.params['date'] }, 202),
       summary: 'rebuild a day',
       scope: 'write',
     });

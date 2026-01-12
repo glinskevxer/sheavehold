@@ -105,6 +105,6 @@ describe('the page body', () => {
 
   it('gives null rather than leaving the cursor off on the last page', () => {
     const page = paginate(rows, { limit: 100, after: undefined }, keyOf);
-    expect(pageBody(page, (row) => row.id).nextCursor).toBeNull();
+    expect(pageBody(page, (row) => row.id)['nextCursor']).toBeNull();
   });
 });

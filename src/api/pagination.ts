@@ -29,7 +29,7 @@ export interface Page<T> {
 export function readPageRequest(
   query: Readonly<Record<string, string>>,
 ): Result<PageRequest, ApiResponse> {
-  const rawLimit = query.limit;
+  const rawLimit = query['limit'];
   let limit = DEFAULT_PAGE_SIZE;
   if (rawLimit !== undefined && rawLimit !== '') {
     const parsed = Number(rawLimit);
@@ -41,7 +41,7 @@ export function readPageRequest(
     }
     limit = parsed;
   }
-  const after = query.after === undefined || query.after === '' ? undefined : query.after;
+  const after = query['after'] === undefined || query['after'] === '' ? undefined : query['after'];
   return ok({ limit, after });
 }
 

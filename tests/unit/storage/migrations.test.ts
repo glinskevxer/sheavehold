@@ -73,7 +73,7 @@ describe('migrating a store', () => {
   it('runs only what is pending', () => {
     const outcome = expectOk(migrate({ schemaVersion: 2 }, all), 'migrate');
     expect(outcome.applied.map((migration) => migration.id)).toEqual([3]);
-    expect(outcome.state.exceptions).toBeUndefined();
+    expect(outcome.state['exceptions']).toBeUndefined();
   });
 
   it('does nothing to a store already at the latest', () => {

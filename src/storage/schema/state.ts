@@ -88,11 +88,11 @@ export const migration001: Migration = {
       ...INITIAL_STATE,
       ...state,
       schemaVersion: 1,
-      scans: Array.isArray(state.scans) ? (state.scans as StoredScanRow[]) : [],
-      rides: Array.isArray(state.rides) ? (state.rides as StoredRideRow[]) : [],
-      visits: Array.isArray(state.visits) ? (state.visits as StoredVisitRow[]) : [],
-      batches: Array.isArray(state.batches) ? state.batches : [],
-      throughSequence: typeof state.throughSequence === 'number' ? state.throughSequence : 0,
+      scans: Array.isArray(state['scans']) ? (state['scans'] as StoredScanRow[]) : [],
+      rides: Array.isArray(state['rides']) ? (state['rides'] as StoredRideRow[]) : [],
+      visits: Array.isArray(state['visits']) ? (state['visits'] as StoredVisitRow[]) : [],
+      batches: Array.isArray(state['batches']) ? state['batches'] : [],
+      throughSequence: typeof state['throughSequence'] === 'number' ? state['throughSequence'] : 0,
     };
     return next;
   },
@@ -100,10 +100,10 @@ export const migration001: Migration = {
 
 export function isStoreState(value: PersistedState): value is StoreStateV1 {
   return (
-    Array.isArray(value.scans) &&
-    Array.isArray(value.rides) &&
-    Array.isArray(value.visits) &&
-    typeof value.throughSequence === 'number'
+    Array.isArray(value['scans']) &&
+    Array.isArray(value['rides']) &&
+    Array.isArray(value['visits']) &&
+    typeof value['throughSequence'] === 'number'
   );
 }
 

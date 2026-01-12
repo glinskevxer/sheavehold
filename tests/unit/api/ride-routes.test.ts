@@ -52,7 +52,7 @@ describe('reading visits', () => {
   it('gives the session count rather than the sessions', () => {
     const visits = (get('/visits/day/2025-01-13').body as { visits: Record<string, unknown>[] })
       .visits;
-    expect(visits[0]?.sessions).toBe(1);
+    expect(visits[0]?.['sessions']).toBe(1);
   });
 
   it('refuses a bad date', () => {
