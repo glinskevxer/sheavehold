@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { addDoctorCommand } from '../../../src/cli/commands/doctor.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { entitlement } from '../../support/entitlements.js';
-import { cliHarness } from '../../support/cli.js';
+import { addDoctorCommand } from '../../../../src/cli/commands/doctor.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { entitlement } from '../../../support/entitlements.js';
+import { cliHarness } from '../../../support/cli.js';
 
 const harness = () => cliHarness([addDoctorCommand]);
 

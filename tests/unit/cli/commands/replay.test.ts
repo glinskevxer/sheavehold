@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { addReplayCommand } from '../../../src/cli/commands/replay.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { ScanStore } from '../../../src/storage/repository/scans.js';
-import { cliHarness } from '../../support/cli.js';
+import { addReplayCommand } from '../../../../src/cli/commands/replay.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { ScanStore } from '../../../../src/storage/repository/scans.js';
+import { cliHarness } from '../../../support/cli.js';
 
 const harness = () => cliHarness([addReplayCommand]);
 const pair = (out: readonly string[], label: string, value: string) =>

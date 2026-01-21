@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { addExceptionsCommand } from '../../../src/cli/commands/exceptions.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { cliHarness } from '../../support/cli.js';
+import { addExceptionsCommand } from '../../../../src/cli/commands/exceptions.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { cliHarness } from '../../../support/cli.js';
 
 function harness() {
   const cli = cliHarness([addExceptionsCommand]);

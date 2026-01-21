@@ -32,6 +32,8 @@ jobs:
         run: npm run lint
       - name: format
         run: npm run format:check
+      - name: the tree is the shape the suite assumes
+        run: npm run verify-tree
 
   test:
     name: tests on node ${{ matrix.node }}

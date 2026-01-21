@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { addDayCommand } from '../../../src/cli/commands/day.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { cliHarness } from '../../support/cli.js';
+import { addDayCommand } from '../../../../src/cli/commands/day.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { cliHarness } from '../../../support/cli.js';
 
 const harness = () => cliHarness([addDayCommand]);
 

@@ -3,9 +3,9 @@ import {
   addRevenueCommand,
   WEIGHTINGS,
   weightingNamed,
-} from '../../../src/cli/commands/revenue.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { cliHarness } from '../../support/cli.js';
+} from '../../../../src/cli/commands/revenue.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { cliHarness } from '../../../support/cli.js';
 
 const harness = () => cliHarness([addRevenueCommand]);
 

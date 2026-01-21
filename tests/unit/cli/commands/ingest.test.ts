@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { addIngestCommand, receiptLine } from '../../../src/cli/commands/ingest.js';
-import { EXIT_FAILED, EXIT_OK } from '../../../src/cli/output.js';
-import { cliHarness } from '../../support/cli.js';
-import { uploadFile } from '../../support/uploads.js';
+import { addIngestCommand, receiptLine } from '../../../../src/cli/commands/ingest.js';
+import { EXIT_FAILED, EXIT_OK } from '../../../../src/cli/output.js';
+import { cliHarness } from '../../../support/cli.js';
+import { uploadFile } from '../../../support/uploads.js';
 
 function harness() {
   const cli = cliHarness([addIngestCommand]);
