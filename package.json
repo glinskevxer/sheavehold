@@ -19,7 +19,9 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "start": "tsx src/cli/entry.ts",
     "coverage": "vitest run --coverage",
-    "verify-tree": "tsx scripts/verify-tree.ts"
+    "verify-tree": "tsx scripts/verify-tree.ts",
+    "commands": "tsx scripts/build-command-reference.ts",
+    "commands:check": "tsx scripts/build-command-reference.ts --check"
   },
   "dependencies": {
     "commander": "13.1.0",
