@@ -74,6 +74,22 @@ jobs:
           path: coverage/
           retention-days: 7
 
+  docs:
+    name: the generated docs are current
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+          cache: npm
+      - run: npm ci
+      - name: the command reference is current
+        run: npm run commands:check
+      - name: the api reference is current
+        run: npm run api-docs:check
+
   build:
     name: the package builds and the cli runs
     runs-on: ubuntu-latest

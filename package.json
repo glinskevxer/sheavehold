@@ -21,7 +21,9 @@
     "coverage": "vitest run --coverage",
     "verify-tree": "tsx scripts/verify-tree.ts",
     "commands": "tsx scripts/build-command-reference.ts",
-    "commands:check": "tsx scripts/build-command-reference.ts --check"
+    "commands:check": "tsx scripts/build-command-reference.ts --check",
+    "api-docs": "tsx scripts/build-api-reference.ts",
+    "api-docs:check": "tsx scripts/build-api-reference.ts --check"
   },
   "dependencies": {
     "commander": "13.1.0",
