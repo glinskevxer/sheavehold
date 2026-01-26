@@ -8,7 +8,7 @@ import type { CliApp } from './app.js';
  * command line is a pure function of argv and the injected app.
  */
 
-export const VERSION = '1.0.0';
+export const VERSION = '0.9.0';
 
 export type CommandBuilder = (program: Command, app: CliApp, output: Output) => void;
 

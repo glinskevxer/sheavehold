@@ -1,6 +1,6 @@
 {
   "name": "sheavehold",
-  "version": "0.1.0",
+  "version": "0.9.0",
   "private": true,
   "description": "Lift access gate telemetry and skier visit analytics for a ski area",
   "license": "UNLICENSED",
@@ -23,7 +23,8 @@
     "commands": "tsx scripts/build-command-reference.ts",
     "commands:check": "tsx scripts/build-command-reference.ts --check",
     "api-docs": "tsx scripts/build-api-reference.ts",
-    "api-docs:check": "tsx scripts/build-api-reference.ts --check"
+    "api-docs:check": "tsx scripts/build-api-reference.ts --check",
+    "release-check": "tsx scripts/release-check.ts"
   },
   "dependencies": {
     "commander": "13.1.0",
