@@ -8,7 +8,7 @@ import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
 import { readDateArg, readPeriodArgs } from '../period.js';
-import { recomputeContext } from './day.js';
+import { recomputeContext } from '../../service/stores.js';
 
 /**
  * Rebuilding from the scans that are on file, which is what a rule change or a

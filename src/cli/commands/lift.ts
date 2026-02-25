@@ -10,7 +10,7 @@ import { renderPairs, renderTable, type Column } from '../../util/table.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
-import { dailyContext } from './day.js';
+import { reportContext } from '../../service/stores.js';
 
 /**
  * `sheavehold lift` answers the two questions the lift maintenance department
@@ -45,7 +45,7 @@ export function addLiftCommand(program: Command, app: CliApp, output: Output): v
         markFailed(program);
         return;
       }
-      const rows = liftDay(date.value, dailyContext(app));
+      const rows = liftDay(date.value, reportContext(app));
       output.line(`lifts on ${date.value}`);
       output.lines(
         renderTable(rows, [
@@ -123,7 +123,7 @@ export function addLiftCommand(program: Command, app: CliApp, output: Output): v
         markFailed(program);
         return;
       }
-      const report = buildUtilisationReport(from.value, to.value, dailyContext(app), threshold);
+      const report = buildUtilisationReport(from.value, to.value, reportContext(app), threshold);
       output.lines(renderUtilisationReport(report));
     });
 }

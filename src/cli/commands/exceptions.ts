@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import { buildExceptionReport, renderExceptionReport } from '../../report/exceptions.js';
 import { applyOverride, scanDateForExceptions } from '../../service/exceptions.js';
 import { isDisposition } from '../../domain/exception/register.js';
+import { exceptionScanContext } from '../../service/stores.js';
 import { renderPairs } from '../../util/table.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
@@ -14,16 +15,6 @@ import { readDateArg, readPeriodArgs } from '../period.js';
  * somebody willing to type their own name behind it, and the shift laptop is
  * logged in as ops all season.
  */
-
-function scanContext(app: CliApp) {
-  return {
-    rides: app.rides,
-    register: app.register,
-    lifts: app.lifts,
-    transfers: app.transfers,
-    guests: app.guests,
-  };
-}
 
 export function addExceptionsCommand(program: Command, app: CliApp, output: Output): void {
   const exceptions = program.command('exceptions').description('the supervisor work queue');
@@ -52,7 +43,7 @@ export function addExceptionsCommand(program: Command, app: CliApp, output: Outp
     .action((raw: string) => {
       const date = readDateArg(raw, program, output);
       if (date === undefined) return;
-      const result = scanDateForExceptions(date, scanContext(app));
+      const result = scanDateForExceptions(date, exceptionScanContext(app));
       output.lines(
         renderPairs([
           ['date', result.date],

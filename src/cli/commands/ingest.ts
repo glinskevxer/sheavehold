@@ -1,5 +1,6 @@
 import type { Command } from 'commander';
 import { ingestUpload, type IngestReceipt } from '../../service/ingest.js';
+import { ingestContext } from '../../service/stores.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
@@ -38,11 +39,7 @@ export function addIngestCommand(program: Command, app: CliApp, output: Output):
         }
 
         const receipt = ingestUpload(text, {
-          terminals: app.terminals,
-          clocks: app.clocks,
-          scans: app.scans,
-          sequences: app.sequences,
-          receivedAt: app.now(),
+          ...ingestContext(app),
           storeUnverified: options.force === true,
         });
 

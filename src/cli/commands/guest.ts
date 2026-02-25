@@ -8,6 +8,7 @@ import {
   type GuestQueryContext,
 } from '../../service/guest-query.js';
 import { expect as expectOk } from '../../util/result.js';
+import { guestQueryContext } from '../../service/stores.js';
 import { renderPairs, renderTable, type Column } from '../../util/table.js';
 import type { EntitlementLine } from '../../service/guest-query.js';
 import type { CliApp } from '../app.js';
@@ -36,12 +37,7 @@ const entitlementColumns: Column<EntitlementLine>[] = [
 function guestContext(app: CliApp, asOf: string): GuestQueryContext {
   const date = parseOperatingDate(asOf);
   const fallback = parseOperatingDate(operatingDay(app.now()));
-  const chosen = date.ok ? date : fallback;
-  return {
-    reference: app.reference,
-    rides: app.rides,
-    asOf: expectOk(chosen, 'as of date'),
-  };
+  return guestQueryContext(app, expectOk(date.ok ? date : fallback, 'as of date'));
 }
 
 /** The guest behind whatever identifier the desk typed. */

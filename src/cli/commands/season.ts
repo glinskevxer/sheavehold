@@ -6,7 +6,7 @@ import { buildProductMix, renderProductMix } from '../../report/product-mix.js';
 import type { CliApp } from '../app.js';
 import type { Output } from '../output.js';
 import { readCount, readDateArg, readSeasonPeriod } from '../period.js';
-import { dailyContext } from './day.js';
+import { reportContext } from '../../service/stores.js';
 
 /**
  * The season commands, which are the ones that go in an email rather than on
@@ -31,7 +31,7 @@ export function addSeasonCommand(program: Command, app: CliApp, output: Output):
       const period = readSeasonPeriod(app, rawTo, options.from, program, output);
       if (period === undefined) return;
       output.lines(
-        renderSeasonReport(buildSeasonReport(period.from, period.to, dailyContext(app))),
+        renderSeasonReport(buildSeasonReport(period.from, period.to, reportContext(app))),
       );
     });
 
@@ -47,7 +47,7 @@ export function addSeasonCommand(program: Command, app: CliApp, output: Output):
       const against = readDateArg(options.against, program, output, 'against');
       if (against === undefined) return;
       output.lines(
-        renderComparison(buildComparison(period.from, period.to, against, dailyContext(app))),
+        renderComparison(buildComparison(period.from, period.to, against, reportContext(app))),
       );
     });
 
@@ -79,6 +79,6 @@ export function addSeasonCommand(program: Command, app: CliApp, output: Output):
     .action((rawTo: string, options: { from?: string }) => {
       const period = readSeasonPeriod(app, rawTo, options.from, program, output);
       if (period === undefined) return;
-      output.lines(renderProductMix(buildProductMix(period.from, period.to, dailyContext(app))));
+      output.lines(renderProductMix(buildProductMix(period.from, period.to, reportContext(app))));
     });
 }

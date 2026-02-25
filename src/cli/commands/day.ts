@@ -4,6 +4,7 @@ import { renderDailyCsv } from '../../report/csv.js';
 import { renderDailyJson } from '../../report/json.js';
 import { renderDailyReportText } from '../../report/text.js';
 import { recomputeDate } from '../../service/recompute.js';
+import { recomputeContext, reportContext } from '../../service/stores.js';
 import type { CliApp } from '../app.js';
 import { markFailed } from '../main.js';
 import type { Output } from '../output.js';
@@ -20,31 +21,6 @@ export interface DayOptions {
   readonly format?: string;
   readonly rebuild?: boolean;
   readonly out?: string;
-}
-
-export function dailyContext(app: CliApp) {
-  return {
-    rides: app.rides,
-    scans: app.scans,
-    calendar: app.calendar,
-    lifts: app.lifts,
-    reference: app.reference,
-    register: app.register,
-    generatedAt: app.now(),
-  };
-}
-
-export function recomputeContext(app: CliApp) {
-  return {
-    reference: app.reference,
-    scans: app.scans,
-    rides: app.rides,
-    terminals: app.terminals,
-    lifts: app.lifts,
-    products: app.products,
-    calendar: app.calendar,
-    blackouts: app.blackouts,
-  };
 }
 
 export function addDayCommand(program: Command, app: CliApp, output: Output): void {
@@ -64,7 +40,7 @@ export function addDayCommand(program: Command, app: CliApp, output: Output): vo
         output.line(`rebuilt ${result.date} to ${result.rides.length} rides`);
       }
 
-      const report = buildDailyReport(date, dailyContext(app));
+      const report = buildDailyReport(date, reportContext(app));
       const format = options.format ?? 'text';
       let body: string;
       if (format === 'json') body = renderDailyJson(report, true);
