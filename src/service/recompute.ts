@@ -64,6 +64,11 @@ export interface RecomputeContext {
   readonly boundaryGraceMinutes?: number | undefined;
   /** Turn the mid station inference off, which the audit run does. */
   readonly inferMidStation?: boolean | undefined;
+  /**
+   * Supply the day counter rather than having it rebuilt from every visit in
+   * the store. The batch replay passes one it carries forward.
+   */
+  readonly seedLedger?: ((date: OperatingDate) => DayUseLedger) | undefined;
 }
 
 /**
@@ -94,7 +99,7 @@ export function recomputeDate(date: OperatingDate, context: RecomputeContext): R
     products: context.products,
     calendar: context.calendar,
     blackouts: context.blackouts,
-    ledger: seedLedger(context, date),
+    ledger: context.seedLedger?.(date) ?? seedLedger(context, date),
   });
 
   const built = buildRides(authorisations, { lifts: context.lifts });
