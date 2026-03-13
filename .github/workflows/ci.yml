@@ -64,7 +64,7 @@ jobs:
           node-version: '22.13.1'
           cache: npm
       - run: npm ci
-      - name: coverage
+      - name: coverage, which fails below the floors in vitest.config.ts
         run: npm run coverage
       - name: keep the report
         uses: actions/upload-artifact@v4
