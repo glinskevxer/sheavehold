@@ -1,5 +1,12 @@
 # changelog
 
+## 1.0.0
+
+- First release the base stations run.
+- The version lives in one file and the release check holds the package, the
+  code and the changelog to it.
+- Coverage has a floor under it and the generated pages are checked in ci.
+
 ## 0.9.0
 
 - The whole command line, the in process router and the generated references.

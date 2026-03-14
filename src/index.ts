@@ -30,4 +30,4 @@ export { daySummary, periodTotals } from './service/query.js';
 export { buildDailyReport } from './report/daily.js';
 export { renderDailyReport } from './report/text.js';
 export { buildRouter } from './api/build.js';
-export { VERSION } from './cli/main.js';
+export { BUILD, VERSION, canRead, describeBuild, parseVersion } from './version.js';

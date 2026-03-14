@@ -1,5 +1,5 @@
 import type { Command } from 'commander';
-import { VERSION } from '../main.js';
+import { describeBuild } from '../../version.js';
 import type { Output } from '../output.js';
 import type { CliApp } from '../app.js';
 
@@ -14,7 +14,7 @@ export function addAboutCommand(program: Command, app: CliApp, output: Output): 
     .command('about')
     .description('what this build is and what it holds')
     .action(() => {
-      output.line(`sheavehold ${VERSION}`);
+      output.line(describeBuild());
       output.line(`season ${app.calendar.season.name}`);
       output.line(`lifts ${app.lifts.size}, terminals ${app.terminals.size}`);
       output.line(`scans ${app.scans.scans.size}, rides ${app.rides.rides.size}`);

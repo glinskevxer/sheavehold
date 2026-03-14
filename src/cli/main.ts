@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { EXIT_FAILED, EXIT_OK, EXIT_USAGE, type Output } from './output.js';
+import { VERSION } from '../version.js';
 import type { CliApp } from './app.js';
 
 /**
@@ -8,7 +9,7 @@ import type { CliApp } from './app.js';
  * command line is a pure function of argv and the injected app.
  */
 
-export const VERSION = '0.9.0';
+export { VERSION } from '../version.js';
 
 export type CommandBuilder = (program: Command, app: CliApp, output: Output) => void;
 

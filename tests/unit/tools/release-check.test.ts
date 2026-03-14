@@ -9,7 +9,7 @@ import {
   topChangelogVersion,
   type ReleaseInput,
 } from '../../../src/tools/release-check.js';
-import { VERSION } from '../../../src/cli/main.js';
+import { VERSION } from '../../../src/version.js';
 
 const CHANGELOG = `# changelog
 
